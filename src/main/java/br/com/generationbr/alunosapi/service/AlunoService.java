@@ -11,7 +11,7 @@ import br.com.generationbr.alunosapi.repository.AlunoRepository;
 @Service
 public class AlunoService {
 
-    private AlunoRepository alunoRepository;
+    private final AlunoRepository alunoRepository;
 
     public AlunoService(AlunoRepository alunoRepository) {
         this.alunoRepository = alunoRepository;
@@ -77,11 +77,16 @@ public class AlunoService {
     }
 
     /**
-     * Deleta um aluno pelo seu id.
+     * Deleta um aluno pelo seu ID.
      *
-     * @param id o id do aluno a ser deletado
+     * @param id o ID do aluno a ser deletado
+     * @return nenhum
      */
     public void deleteAluno(Long id) {
+        Optional<Aluno> alunoOptional = alunoRepository.findById(id);
+        if (alunoOptional.isEmpty()) {
+            throw new IllegalArgumentException("Aluno não encontrado!");
+        }
         alunoRepository.deleteById(id);
     }
 }
