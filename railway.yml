@@ -1,0 +1,10 @@
+version: 1
+name: br.com.generationbr.alunos-api
+
+build:
+  env: java
+  commands:
+    - mvn clean install
+
+start:
+  command: mvn spring-boot:run
