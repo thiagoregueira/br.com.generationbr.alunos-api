@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.generationbr.alunosapi.model.Aluno;
 import br.com.generationbr.alunosapi.service.AlunoService;
+import io.swagger.v3.oas.annotations.Operation;
 
 @RestController
 @RequestMapping("/alunos")
@@ -32,6 +33,7 @@ public class AlunoController {
      *
      * @return uma lista de todos os alunos
      */
+    @Operation(summary = "get all", tags = "Aluno")
     @GetMapping
     public List<Aluno> getAllAlunos() {
         return alunoService.getAllAlunos();
@@ -44,10 +46,15 @@ public class AlunoController {
      * @return um ResponseEntity contendo o objeto Aluno se encontrado, ou uma
      *         resposta de não encontrado se não encontrado
      */
+    @Operation(summary = "get by id", tags = "Aluno")
     @GetMapping("/{id}")
     public ResponseEntity<Aluno> getAlunoById(@PathVariable Long id) {
-        Optional<Aluno> aluno = alunoService.getAlunoById(id);
-        return aluno.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        try {
+            Optional<Aluno> aluno = alunoService.getAlunoById(id);
+            return aluno.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     /**
@@ -56,6 +63,7 @@ public class AlunoController {
      * @param aluno o objeto Aluno a ser salvo
      * @return o ResponseEntity contendo o objeto Aluno salvo
      */
+    @Operation(summary = "Save new aluno", tags = "Aluno")
     @PostMapping
     public ResponseEntity<Aluno> saveAluno(@RequestBody Aluno aluno) {
         Aluno savedAluno = alunoService.saveAluno(aluno);
@@ -69,19 +77,24 @@ public class AlunoController {
      * @param aluno o objeto Aluno atualizado
      * @return o ResponseEntity contendo o objeto Aluno atualizado
      */
+    @Operation(summary = "Update aluno", tags = "Aluno")
     @PutMapping("/{id}")
     public ResponseEntity<Aluno> updateAluno(@PathVariable Long id, @RequestBody Aluno aluno) {
-        Optional<Aluno> alunoOptional = alunoService.getAlunoById(id);
-        if (alunoOptional.isPresent()) {
-            Aluno alunoAtualizado = alunoOptional.get();
-            alunoAtualizado.setNome(aluno.getNome());
-            alunoAtualizado.setIdade(aluno.getIdade());
-            alunoAtualizado.setNotaPrimeiroSemestre(aluno.getNotaPrimeiroSemestre());
-            alunoAtualizado.setNotaSegundoSemestre(aluno.getNotaSegundoSemestre());
-            alunoAtualizado.setNomeProfessor(aluno.getNomeProfessor());
-            alunoAtualizado.setNumeroSala(aluno.getNumeroSala());
-            return ResponseEntity.ok(alunoService.saveAluno(alunoAtualizado));
-        } else {
+        try {
+            Optional<Aluno> alunoOptional = alunoService.getAlunoById(id);
+            if (alunoOptional.isPresent()) {
+                Aluno alunoAtualizado = alunoOptional.get();
+                alunoAtualizado.setNome(aluno.getNome());
+                alunoAtualizado.setIdade(aluno.getIdade());
+                alunoAtualizado.setNotaPrimeiroSemestre(aluno.getNotaPrimeiroSemestre());
+                alunoAtualizado.setNotaSegundoSemestre(aluno.getNotaSegundoSemestre());
+                alunoAtualizado.setNomeProfessor(aluno.getNomeProfessor());
+                alunoAtualizado.setNumeroSala(aluno.getNumeroSala());
+                return ResponseEntity.ok(alunoService.saveAluno(alunoAtualizado));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
     }
@@ -93,6 +106,7 @@ public class AlunoController {
      * @return um ResponseEntity sem conteúdo se a deleção for bem-sucedida,
      *         ou um ResponseEntity com o status "not found" se o Aluno não existir
      */
+    @Operation(summary = "Delete aluno", tags = "Aluno")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAluno(@PathVariable Long id) {
         try {
